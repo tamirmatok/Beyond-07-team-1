@@ -7,7 +7,6 @@ import django.db.models.manager
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -37,6 +36,7 @@ class Migration(migrations.Migration):
                 ('user', models.OneToOneField(null=True,
                                               on_delete=django.db.models.deletion.CASCADE,
                                               to=settings.AUTH_USER_MODEL)),
+
             ],
             managers=[
                 ('DogOwners', django.db.models.manager.Manager()),

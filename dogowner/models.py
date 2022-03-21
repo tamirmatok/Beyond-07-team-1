@@ -9,7 +9,6 @@ class Gender(models.TextChoices):
 
 
 class Dogowner(models.Model):
-
     user = models.OneToOneField(User,
                                 null=True,
                                 on_delete=models.CASCADE,
@@ -25,7 +24,7 @@ class Dogowner(models.Model):
     dog_gender = models.CharField(
         max_length=2,
         choices=Gender.choices,
-        default='M',)
+        default='M', )
 
     DogOwners = models.Manager()
 

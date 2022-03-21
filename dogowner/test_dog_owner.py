@@ -2,7 +2,6 @@ from .models import Dogowner
 from django.contrib.auth.models import User
 import pytest
 
-
 EMAIL = 'testuser@gmail.com'
 USERNAME = 'testuser'
 PASSWORD = 'testpassowrd'
@@ -21,7 +20,7 @@ DOG_GENDER = 'M'
 def dog_owner_0():
     return Dogowner(user=User(email=EMAIL,
                               username=USERNAME,
-                              password=PASSWORD,),
+                              password=PASSWORD, ),
                     dog_name=DOG_NAME,
                     first_name=FIRST_NAME,
                     last_name=LAST_NAME,
@@ -53,6 +52,7 @@ class TestDogOwnerModel:
         assert dog_owner_0.user in User.objects.all()
         assert dog_owner_0 in Dogowner.DogOwners.all()
 
+    
     def test_del_dog_owner(self, dog_owner_0):
         dog_owner_0.user.save()
         dog_owner_0.save()
