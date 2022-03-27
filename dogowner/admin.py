@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Dogowner
+from .models import DogOwner
 
-admin.site.register(Dogowner)
+admin.site.register(DogOwner)
 # Register your models here.

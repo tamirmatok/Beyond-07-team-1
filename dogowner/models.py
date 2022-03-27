@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.core.validators import validate_email, URLValidator
+from .validators import username_validator
 
 
 class Gender(models.TextChoices):
@@ -10,7 +10,8 @@ class Gender(models.TextChoices):
     Unknown = 'UN', 'Unknown'
 
 
-class Dogowner(models.Model):
+class DogOwner(models.Model):
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=15, blank=True)
     last_name = models.CharField(max_length=15, blank=True)
@@ -28,21 +29,31 @@ class Dogowner(models.Model):
     def __str__(self):
         return self.first_name + self.last_name
 
+    @staticmethod
+    def create(email, username, password, dog_name,
+               first_name, last_name, phone_number,
+               dog_race, dog_picture_url, dog_age,
+               dog_weight, dog_gender):
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Dogowner.objects.create(user=instance, dog_name=instance.dogowner.dog_name,
-                                first_name=instance.dogowner.first_name,
-                                last_name=instance.dogowner.last_name,
-                                phone_number=instance.dogowner.phone_number,
-                                dog_race=instance.dogowner.dog_race,
-                                dog_picture_url=instance.dogowner.dog_picture_url,
-                                dog_age=instance.dogowner.dog_age,
-                                dog_weight=instance.dogowner.dog_weight,
-                                dog_gender=instance.dogowner.dog_gender)
+        validate_email(email)
+        username_validator(username)
+        URLValidator(dog_picture_url)
 
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.dogowner.save()
+        django_user = User.objects.create_user(username=username,
+                                               email=email,
+                                               password=password
+                                               )
+        new_dog_owner = DogOwner(user=django_user,
+                                 first_name=first_name,
+                                 last_name=last_name,
+                                 phone_number=phone_number,
+                                 dog_name=dog_name,
+                                 dog_race=dog_race,
+                                 dog_picture_url=dog_picture_url,
+                                 dog_age=dog_age,
+                                 dog_weight=dog_weight,
+                                 dog_gender=dog_gender
+                                 )
+        new_dog_owner.user.save()
+        new_dog_owner.save()
+        return new_dog_owner

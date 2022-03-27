@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main.apps.MainConfig',
-    'dogowner.apps.DogownerConfig',
+    'DogOwner.apps.DogOwnerConfig',
 ]
 
 MIDDLEWARE = [

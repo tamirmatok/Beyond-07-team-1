@@ -1,5 +1,6 @@
-from .models import Dogowner
+from .models import DogOwner
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 import pytest
 
 EMAIL = 'testuser@gmail.com'
@@ -17,42 +18,76 @@ DOG_GENDER = 'M'
 
 
 @pytest.fixture
-def dog_owner_0():
-    return User(email=EMAIL,
-                username=USERNAME,
-                password=PASSWORD,
-                dogowner=Dogowner(dog_name=DOG_NAME,
-                                  first_name=FIRST_NAME,
-                                  last_name=LAST_NAME,
-                                  phone_number=PHONE_NUMBER,
-                                  dog_race=DOG_RACE,
-                                  dog_picture_url=DOG_PICTURE_URL,
-                                  dog_age=DOG_AGE,
-                                  dog_weight=DOG_WEIGHT,
-                                  dog_gender=DOG_GENDER
-                                  )
-                )
+def dogOwner01():
+    return DogOwner.create(email=EMAIL,
+                           username=USERNAME,
+                           password=PASSWORD,
+                           dog_name=DOG_NAME,
+                           first_name=FIRST_NAME,
+                           last_name=LAST_NAME,
+                           phone_number=PHONE_NUMBER,
+                           dog_race=DOG_RACE,
+                           dog_picture_url=DOG_PICTURE_URL,
+                           dog_age=DOG_AGE,
+                           dog_weight=DOG_WEIGHT,
+                           dog_gender=DOG_GENDER
+                           )
 
 
 @pytest.mark.django_db
 class TestDogOwnerModel:
-    def test_create_dogowner(self, dog_owner_0):
-        assert dog_owner_0.username == USERNAME
-        assert dog_owner_0.email == EMAIL
-        assert dog_owner_0.dogowner.dog_name == DOG_NAME
-        assert dog_owner_0.dogowner.dog_race == DOG_RACE
-        assert dog_owner_0.dogowner.dog_picture_url == DOG_PICTURE_URL
-        assert dog_owner_0.dogowner.dog_age == DOG_AGE
-        assert dog_owner_0.dogowner.dog_weight == DOG_WEIGHT
-        assert dog_owner_0.dogowner.dog_gender == DOG_GENDER
+    def test_persist_dog_owner(self, dogOwner01):
+        dogOwner01.save()
+        assert dogOwner01.user in User.objects.all()
+        assert dogOwner01 in DogOwner.objects.all()
 
-    def test_persist_member(self, dog_owner_0):
-        dog_owner_0.save()
-        assert dog_owner_0 in User.objects.all()
-        assert dog_owner_0.dogowner in Dogowner.objects.all()
+    def test_del_dogowner(self, dogOwner01):
+        dogOwner01.save()
+        dogOwner01.delete()
+        assert dogOwner01 not in User.objects.all()
+        assert dogOwner01 not in DogOwner.objects.all()
 
-    def test_del_dog_owner(self, dog_owner_0):
-        dog_owner_0.save()
-        dog_owner_0.delete()
-        assert dog_owner_0 not in User.objects.all()
-        assert dog_owner_0.dogowner not in Dogowner.objects.all()
+
+@pytest.mark.parametrize(
+    "email, username, password, dog_name, first_name, last_name, phone_number, dog_race,"
+    " dog_picture_url, dog_age, dog_weight, dog_gender",
+    [
+        ('NOT_AN_EMAIL', 'same_user_name', 'password123', 'dog_name', 'first_name', 'last_name',
+         232323223, 'dog_race', 'dog_picture_url', 4, 2, 'M'),
+        ('email@address.com', 'same_user_name', 'password123', 'dog_name', 'first_name', 'last_name',
+         232323223, 'dog_race', 'dog_picture_url', 3, 1, 'M'),
+        ('email@address.com', 'same_user_name', 'password123', 'dog_name', 'first_name', 'last_name',
+         232323223, 'dog_race', 'dog_picture_url', 2, 5, 'M'),
+        ('email@address.com', 'username3', 'password123', 'dog_name', 'first_name', 'last_name',
+         232323223, 'dog_race', 'dog_picture_url', 1, 6, 'Not_in_gender'),
+    ])
+@pytest.mark.django_db
+def test_value_error(email, username, password, dog_name, first_name, last_name, phone_number,
+                     dog_race, dog_picture_url, dog_age, dog_weight, dog_gender):
+    with pytest.raises(ValidationError, match="Enter a valid email address."):
+        dogOwner = DogOwner.create(email=email,
+                                   username=username,
+                                   password=password,
+                                   dog_name=dog_name,
+                                   first_name=first_name,
+                                   last_name=last_name,
+                                   phone_number=phone_number,
+                                   dog_race=dog_race,
+                                   dog_picture_url=dog_picture_url,
+                                   dog_age=dog_age,
+                                   dog_weight=dog_weight,
+                                   dog_gender=dog_gender)
+
+# @pytest.mark.parametrize(
+#     "email, username, password, dog_name, first_name, last_name, phone_number, dog_race,"
+#     " dog_picture_url, dog_age, dog_weight, dog_gender",
+#     [
+#         ('email@address.com', 'username1', 'password123', 'dog_name', 'first_name', 'last_name',
+#          232323223, 'dog_race', 'dog_picture_url', 'not_number_error', 2, 'M'),
+#         ('', 'same_user_name', 'password123', 'dog_name', 'first_name', 'last_name',
+#          232323223, 'dog_race', 'dog_picture_url', 3, 1, 'M'),
+#         ('email@address.com', 'same_user_name', 'password123', 'dog_name', 'first_name', 'last_name',
+#          232323223, 'dog_race', 'dog_picture_url', 2, 5, 'M'),
+#         ('email@address.com', 'username3', 'password123', 'dog_name', 'first_name', 'last_name',
+#          232323223, 'dog_race', 'dog_picture_url', 1, 6, 'Not_in_gender'),
+#     ])
