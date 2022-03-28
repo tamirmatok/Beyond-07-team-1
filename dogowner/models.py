@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import validate_email, URLValidator
-from .validators import username_validator
+from django.core.validators import validate_email
+from .validators import validate_username, validate_url
 
 
 class Gender(models.TextChoices):
@@ -36,8 +36,8 @@ class DogOwner(models.Model):
                dog_weight, dog_gender):
 
         validate_email(email)
-        username_validator(username)
-        URLValidator(dog_picture_url)
+        validate_username(username)
+        validate_url(dog_picture_url)
 
         django_user = User.objects.create_user(username=username,
                                                email=email,
